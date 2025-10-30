@@ -1,58 +1,87 @@
 pipeline {
-    agent any
+  agent any
 
-    tools {
-        maven 'Maven'
-        jdk 'JDK18'
+  options {
+    timestamps()
+  }
+
+  stages {
+    stage('build') {
+      steps {
+        echo "Building demo app..."
+        sleep 1
+      }
     }
 
-    // environment {
-    //     GIT_CREDENTIALS_ID = 'autowares-poc'
-    //     RECIPIENT_EMAIL = 'kcml@autowares.com'
-    // }
-
-    stages {
-        stage('Checkout') {
-            steps {
-                script {
-                    echo 'Checking out code from Git repository...'
-                    git branch: 'main',
-                        // credentialsId: "${GIT_CREDENTIALS_ID}",
-                        url: 'https://github.com/prasad-moru/petclinic-spring-boot.git'
-                }
-            }
+    stage('test: integration-&-quality') {
+      parallel {
+        stage('integration') {
+          steps {
+            echo "Running integration tests..."
+            sleep 2
+          }
         }
-
-        stage('Build') {
-            steps {
-                script {
-                    echo 'Building Java application with Maven...'
-                    sh 'mvn clean install'
-                }
-            }
+        stage('quality') {
+          steps {
+            echo "Running code quality checks..."
+            sleep 1
+          }
         }
-
-        stage('Test') {
-            steps {
-                script {
-                    echo 'Running tests...'
-                    sh 'mvn test'
-                }
-            }
-            post {
-                always {
-                    junit '**/target/surefire-reports/*.xml'
-                }
-            }
-        }
-
-        stage('Package') {
-            steps {
-                script {
-                    echo 'Packaging application...'
-                    sh 'mvn package'
-                }
-            }
-        }
+      }
     }
+
+    stage('test: functional') {
+      steps {
+        echo "Running functional tests..."
+        sleep 1
+      }
+    }
+
+    stage('test: load-&-security') {
+      parallel {
+        stage('load') {
+          steps {
+            echo "Running load tests..."
+            sleep 2
+          }
+        }
+        stage('security') {
+          steps {
+            echo "Running security scans..."
+            // Randomly fail this stage to demo red tile
+            script {
+              def fail = new Random().nextBoolean()
+              if (fail) {
+                error "Security scan failed!"
+              } else {
+                echo "Security scan passed!"
+              }
+            }
+          }
+        }
+      }
+    }
+
+    stage('approval') {
+      steps {
+        script {
+          echo "Waiting for manual approval..."
+          input(message: 'Approve deployment to prod?', ok: 'Approve')
+        }
+      }
+    }
+
+    stage('deploy: prod') {
+      steps {
+        echo "Deploying demo app..."
+        sleep 1
+      }
+    }
+  }
+
+  post {
+    always {
+      echo "Pipeline finished!"
+    }
+  }
 }
