@@ -2,7 +2,7 @@ replicaCount: 1
 
 image:
   repository: "autowares.azurecr.io/autowares/appservice"   # <-- replace with your ACR repository
-  tag: "1.0.0-dev"
+  tag: "1.0.0-dev-f98d0fd09"
   pullPolicy: IfNotPresent
 
 service:
