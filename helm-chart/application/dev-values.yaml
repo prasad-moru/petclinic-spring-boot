@@ -1,8 +1,8 @@
 replicaCount: 1
 
 image:
-  repository: "<ACR_NAME>.azurecr.io/spring-app"   # <-- replace with your ACR repository
-  tag: "latest"
+  repository: "autowares.azurecr.io/autowares/appservice"   # <-- replace with your ACR repository
+  tag: "1.0.0-dev"
   pullPolicy: IfNotPresent
 
 service:
